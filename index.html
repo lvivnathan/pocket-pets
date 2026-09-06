@@ -154,7 +154,7 @@
         <div class="helpers" id="helpers">
           <button class="helper" type="button" data-helper="pollo">
             <span class="helper-avatar"><img src="assets/pollo-sprite.webp" alt="The yellow Fortnite Pollo Sprite wearing a headset and green jersey"></span>
-            <h3>Pollo Sprite</h3><p>Restores the first guess you spend on an empty spot.</p><span class="power">Shield restore</span>
+            <h3>Pollo Sprite</h3><p>Restores your first missed guess and calls out which direction to search.</p><span class="power">Sprite radar</span>
           </button>
           <button class="helper" type="button" data-helper="bluebell">
             <span class="helper-avatar"><span class="pet-picture" style="--x:-11%;--y:-91%"><img src="assets/pocket-pets.png" alt="Bluebell the round blue bunny"></span></span>
@@ -191,6 +191,7 @@
       function setPetPicture(element,pet){element.style.setProperty("--x",pet.x);element.style.setProperty("--y",pet.y);element.innerHTML=petPicture(pet)}
       function rollPet(){const boost=selectedHelper==="bluebell"?2:selectedHelper.startsWith("pet-")?1.5:1;const total=pets.reduce((sum,pet)=>sum+pet.weight*(pet.rare?boost:1),0);let roll=Math.random()*total;for(let i=0;i<pets.length;i++){roll-=pets[i].weight*(pets[i].rare?boost:1);if(roll<=0)return i}return 0}
       function maxGuesses(){return selectedHelper==="pip"?4:3}
+      function directionHint(from,to){const fromRow=Math.floor(from/4),fromCol=from%4,toRow=Math.floor(to/4),toCol=to%4,parts=[];if(toRow<fromRow)parts.push("higher");if(toRow>fromRow)parts.push("lower");if(toCol<fromCol)parts.push("to the left");if(toCol>fromCol)parts.push("to the right");return parts.join(" and ")}
       function renderCollection(){
         count.textContent=collection.length;
         if(!collection.length){shelf.innerHTML='<div class="empty">Your shelf is waiting.<br>Find your first tiny friend!</div>';renderLockerPets();return}
@@ -212,7 +213,7 @@
         guesses++;triesLabel.children[guesses-1].classList.add("used");let left=maxGuesses()-guesses;triesLabel.setAttribute("aria-label",`${left} guess${left===1?'':'es'} left`);
         if(index===hidingSpot){const petIndex=rollPet(),pet=pets[petIndex];roundOver=true;button.classList.add("found");const picture=document.createElement("span");picture.className="pet-picture";button.appendChild(picture);setPetPicture(picture,pet);button.setAttribute("aria-label",`Found ${pet.name}!`);collection.push(petIndex);save();renderCollection();message.textContent=`You found ${pet.name}!`;setTimeout(()=>showReward(pet),420);return}
         button.classList.add("guessed");button.disabled=true;
-        if(selectedHelper==="pollo"&&!polloHealUsed){polloHealUsed=true;guesses--;triesLabel.children[guesses].classList.remove("used");left=maxGuesses()-guesses;triesLabel.setAttribute("aria-label",`${left} guesses left`);message.textContent="Pollo restored your guess! Try another spot."}else{message.textContent=left?(left===1?"So close! One last guess.":"Not there — try another spot!"):"The pet slipped away. Let's shuffle!"}
+        if(selectedHelper==="pollo"&&!polloHealUsed){polloHealUsed=true;guesses--;triesLabel.children[guesses].classList.remove("used");left=maxGuesses()-guesses;triesLabel.setAttribute("aria-label",`${left} guesses left`);message.textContent=`Pollo restored your guess — search ${directionHint(index,hidingSpot)}!`}else if(selectedHelper==="pollo"&&left){message.textContent=`Pollo says: search ${directionHint(index,hidingSpot)}!`}else{message.textContent=left?(left===1?"So close! One last guess.":"Not there — try another spot!"):"The pet slipped away. Let's shuffle!"}
         if(!left){roundOver=true;const answer=grid.children[hidingSpot];answer.classList.add("found");answer.classList.add("missed-pet");answer.setAttribute("aria-label","The pet was hiding here");[...grid.children].forEach(spot=>spot.disabled=true)}
       }
       function showReward(pet){setPetPicture(document.querySelector("#won-pet"),pet);document.querySelector("#reward-title").textContent=`You found ${pet.name}!`;document.querySelector("#reward-copy").innerHTML=`${pet.line}${pet.rare?`<br><span class="rarity ${pet.mythic?'mythic':''}">${pet.mythic?'Mythic pet':'Rare pet'}</span>`:''}`;dialog.hidden=false;document.querySelector("#play-again").focus();confetti()}
