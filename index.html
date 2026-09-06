@@ -39,7 +39,10 @@
       .spot.guessed::after { content:"×"; opacity:.72; }
       .spot.found { background:#fff0a8; box-shadow:inset 0 -8px 0 #ffa21b2e,0 5px 0 #ffd45d; animation:found .55s ease both; }
       .spot.found::before { opacity:.18; }
-      .spot.found::after { content:attr(data-pet); font-family:sans-serif; font-size:clamp(2.4rem,8vw,4.6rem); }
+      .spot.found::after { display:none; }
+      .pet-picture { position:relative; display:block; overflow:hidden; border-radius:inherit; isolation:isolate; }
+      .pet-picture img { position:absolute; width:300%; max-width:none; left:var(--x); top:var(--y); }
+      .spot .pet-picture { position:absolute; inset:7px; border-radius:18px; box-shadow:0 5px 14px #37246830; }
       .actions { display:flex; margin-top:22px; justify-content:center; }
       .button { min-height:50px; padding:0 22px; border:0; border-radius:16px; background:var(--purple); box-shadow:0 6px 0 var(--purple-dark); color:white; font-weight:900; cursor:pointer; transition:.15s ease; }
       .button:hover { transform:translateY(-2px); }
@@ -56,13 +59,14 @@
       .collection-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
       .text-button { padding:6px 4px; border:0; background:transparent; color:#7a6d96; cursor:pointer; font-size:.84rem; font-weight:800; }
       .shelf { display:grid; margin-top:14px; gap:10px; grid-template-columns:repeat(4,1fr); }
-      .pet-card { position:relative; display:grid; aspect-ratio:1; place-items:center; border-radius:20px; background:linear-gradient(145deg,#fff6c9,#ffe5f1); box-shadow:inset 0 -5px 0 #704fa417; font-size:2.15rem; animation:pop .35s ease both; }
-      .pet-card small { position:absolute; right:5px; bottom:4px; display:grid; min-width:21px; height:21px; padding:0 5px; place-items:center; border-radius:99px; background:var(--purple); color:white; font-size:.68rem; font-weight:900; }
+      .pet-card { position:relative; display:grid; aspect-ratio:1; place-items:center; overflow:hidden; border-radius:20px; background:linear-gradient(145deg,#fff6c9,#ffe5f1); box-shadow:inset 0 -5px 0 #704fa417; animation:pop .35s ease both; }
+      .pet-card .pet-picture { position:absolute; inset:5px; border-radius:16px; }
+      .pet-card small { position:absolute; z-index:2; right:5px; bottom:4px; display:grid; min-width:21px; height:21px; padding:0 5px; place-items:center; border-radius:99px; background:var(--purple); box-shadow:0 2px 5px #1f164b4d; color:white; font-size:.68rem; font-weight:900; }
       .empty { grid-column:1/-1; padding:18px 10px; color:#83799b; line-height:1.45; text-align:center; }
       .backdrop { position:fixed; z-index:50; inset:0; display:grid; padding:20px; place-items:center; background:#1b143999; backdrop-filter:blur(8px); }
       .backdrop[hidden] { display:none; }
       .dialog { width:min(410px,100%); padding:28px; border-radius:32px; background:white; box-shadow:0 30px 80px #1a0e4159; text-align:center; animation:pop .35s ease both; }
-      .won-pet { display:grid; width:132px; aspect-ratio:1; margin:0 auto 10px; place-items:center; border-radius:44px; background:linear-gradient(145deg,#fff0a8,#ffcfe3); box-shadow:inset 0 -10px 0 #a45b7d1f; font-size:5rem; }
+      .won-pet { width:160px; aspect-ratio:1; margin:0 auto 14px; border:6px solid #fff0a8; border-radius:48px; background:#1e275b; box-shadow:0 10px 24px #40266b38; }
       .dialog h2 { margin:4px 0; font-size:2.3rem; line-height:1; }
       .dialog p { margin:6px 0 20px; color:#756b8f; }
       .spark { position:fixed; z-index:80; width:12px; height:18px; top:-30px; border-radius:4px; pointer-events:none; animation:fall 1.2s ease-in forwards; }
@@ -105,29 +109,29 @@
     </div>
     <div class="backdrop" id="reward-dialog" hidden>
       <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="reward-title">
-        <div class="won-pet" id="won-pet" aria-hidden="true">🐱</div><h2 id="reward-title">You found Mochi!</h2><p id="reward-copy">A new friend joined your pocket.</p>
+        <div class="won-pet pet-picture" id="won-pet" aria-hidden="true"></div><h2 id="reward-title">You found Mochi!</h2><p id="reward-copy">A new friend joined your pocket.</p>
         <button class="button" id="play-again" type="button">Find another pet</button>
       </section>
     </div>
     <script>
       const pets=[
-        {emoji:"🐱",name:"Mochi",line:"Soft paws, serious snack opinions."},
-        {emoji:"🐶",name:"Biscuit",line:"Champion tail-wagger and cloud chaser."},
-        {emoji:"🐸",name:"Pip",line:"Small frog, enormous dreams."},
-        {emoji:"🐰",name:"Bluebell",line:"Hops first and asks questions later."},
-        {emoji:"🐣",name:"Sunny",line:"Carries a little morning everywhere."},
-        {emoji:"🐹",name:"Pebble",line:"Round, cozy, and always curious."},
-        {emoji:"🦊",name:"Maple",line:"Collector of leaves and clever ideas."},
-        {emoji:"🐼",name:"Bao",line:"Professional nap planner."}
+        {name:"Mochi",line:"Soft paws, serious snack opinions.",x:"-15%",y:"-9%"},
+        {name:"Biscuit",line:"Champion tail-wagger and cloud chaser.",x:"-102%",y:"-9%"},
+        {name:"Pip",line:"Small frog, enormous dreams.",x:"-190%",y:"-14%"},
+        {name:"Bluebell",line:"Hops first and asks questions later.",x:"-11%",y:"-91%"},
+        {name:"Bubbles",line:"A sparkly axolotl with excellent manners.",x:"-99%",y:"-94%"},
+        {name:"Sunny",line:"Carries a little morning everywhere.",x:"-192%",y:"-92%"}
       ];
       const grid=document.querySelector("#grid"),message=document.querySelector("#message"),hearts=[...document.querySelectorAll(".tries span")],triesLabel=document.querySelector(".tries"),shelf=document.querySelector("#pet-shelf"),count=document.querySelector("#pet-count"),dialog=document.querySelector("#reward-dialog");
-      let hidingSpot=0,guesses=0,roundOver=false,collection=JSON.parse(localStorage.getItem("pocket-pets")||"[]");
+      let hidingSpot=0,guesses=0,roundOver=false,collection=JSON.parse(localStorage.getItem("pocket-pets")||"[]").filter(index=>pets[index]);
       const save=()=>localStorage.setItem("pocket-pets",JSON.stringify(collection));
+      const petPicture=()=>'<img src="assets/pocket-pets.png" alt="">';
+      function setPetPicture(element,pet){element.style.setProperty("--x",pet.x);element.style.setProperty("--y",pet.y);element.innerHTML=petPicture(pet)}
       function renderCollection(){
         count.textContent=collection.length;
         if(!collection.length){shelf.innerHTML='<div class="empty">Your shelf is waiting.<br>Find your first tiny friend!</div>';return}
         const totals=collection.reduce((map,index)=>{map[index]=(map[index]||0)+1;return map},{});
-        shelf.innerHTML=Object.entries(totals).map(([index,total])=>{const pet=pets[index];return `<div class="pet-card" title="${pet.name}" aria-label="${pet.name}, found ${total} time${total>1?'s':''}">${pet.emoji}${total>1?`<small>${total}</small>`:''}</div>`}).join("");
+        shelf.innerHTML=Object.entries(totals).map(([index,total])=>{const pet=pets[index];return `<div class="pet-card" title="${pet.name}" aria-label="${pet.name}, found ${total} time${total>1?'s':''}"><span class="pet-picture" style="--x:${pet.x};--y:${pet.y}">${petPicture(pet)}</span>${total>1?`<small>${total}</small>`:''}</div>`}).join("");
       }
       function startRound(){
         hidingSpot=Math.floor(Math.random()*9);guesses=0;roundOver=false;message.textContent="Choose your first spot!";hearts.forEach(h=>h.classList.remove("used"));triesLabel.setAttribute("aria-label","3 guesses left");grid.innerHTML="";
@@ -136,11 +140,11 @@
       function chooseSpot(button,index){
         if(roundOver||button.classList.contains("guessed"))return;
         guesses++;hearts[guesses-1].classList.add("used");const left=3-guesses;triesLabel.setAttribute("aria-label",`${left} guess${left===1?'':'es'} left`);
-        if(index===hidingSpot){const petIndex=Math.floor(Math.random()*pets.length),pet=pets[petIndex];roundOver=true;button.classList.add("found");button.dataset.pet=pet.emoji;button.setAttribute("aria-label",`Found ${pet.name}!`);collection.push(petIndex);save();renderCollection();message.textContent=`You found ${pet.name}!`;setTimeout(()=>showReward(pet),420);return}
+        if(index===hidingSpot){const petIndex=Math.floor(Math.random()*pets.length),pet=pets[petIndex];roundOver=true;button.classList.add("found");const picture=document.createElement("span");picture.className="pet-picture";button.appendChild(picture);setPetPicture(picture,pet);button.setAttribute("aria-label",`Found ${pet.name}!`);collection.push(petIndex);save();renderCollection();message.textContent=`You found ${pet.name}!`;setTimeout(()=>showReward(pet),420);return}
         button.classList.add("guessed");button.disabled=true;message.textContent=left?(left===1?"So close! One last guess.":"Not there — try another spot!"):"The pet slipped away. Let's shuffle!";
-        if(!left){roundOver=true;const answer=grid.children[hidingSpot];answer.classList.add("found");answer.dataset.pet="👀";[...grid.children].forEach(spot=>spot.disabled=true)}
+        if(!left){roundOver=true;const answer=grid.children[hidingSpot];answer.classList.add("found");answer.classList.add("missed-pet");answer.setAttribute("aria-label","The pet was hiding here");[...grid.children].forEach(spot=>spot.disabled=true)}
       }
-      function showReward(pet){document.querySelector("#won-pet").textContent=pet.emoji;document.querySelector("#reward-title").textContent=`You found ${pet.name}!`;document.querySelector("#reward-copy").textContent=pet.line;dialog.hidden=false;document.querySelector("#play-again").focus();confetti()}
+      function showReward(pet){setPetPicture(document.querySelector("#won-pet"),pet);document.querySelector("#reward-title").textContent=`You found ${pet.name}!`;document.querySelector("#reward-copy").textContent=pet.line;dialog.hidden=false;document.querySelector("#play-again").focus();confetti()}
       function confetti(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;const colors=["#7857ff","#ff6cae","#ffd85b","#68d6c3","#7ad269"];for(let i=0;i<34;i++){const piece=document.createElement("i");piece.className="spark";piece.style.left=`${Math.random()*100}vw`;piece.style.background=colors[i%colors.length];piece.style.setProperty("--drift",`${Math.random()*160-80}px`);piece.style.animationDelay=`${Math.random()*.35}s`;document.body.appendChild(piece);setTimeout(()=>piece.remove(),1700)}}
       document.querySelector("#new-hunt").addEventListener("click",startRound);
       document.querySelector("#play-again").addEventListener("click",()=>{dialog.hidden=true;startRound();grid.querySelector("button").focus()});
